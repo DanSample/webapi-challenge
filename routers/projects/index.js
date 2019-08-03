@@ -2,7 +2,7 @@ const router = require('express').Router();
 const db = require('../../data/helpers/projectModel');
 const actionsRouter = require('../actions');
 
-// router.use('/:id/actions');
+router.use('/:id/actions', actionsRouter);
 
 router.get('/', async (req, res) => {
   try {

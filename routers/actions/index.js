@@ -1,76 +1,66 @@
 const router = require('express').Router({ mergeParams: true });
-const projectsDb = require('../../data/helpers/projectModel');
-const actionsDb = require('../../data/helpers/actionModel');
+const db = require('../../data/helpers/actionModel');
+const { getProjectActions } = require('../../data/helpers/projectModel');
+const { validateActionId, validateActionBody } = require('../../middleware');
 
 router.get('/', async (req, res) => {
   try {
-    const postId = req.params.id;
-    const actions = await projectsDb.getProjectActions(postId);
-    res.status(200).json({
-      actions
-    });
+    const projectId = req.params.id;
+    const actions = await getProjectActions(projectId);
+    res.json(actions);
   } catch (error) {
     res.status(500).json({
-      error: `An error occurred while attempting to get the project's actions`
+      error: `An error occurred while attempting to get the actions`
     });
   }
 });
 
-router.post('/', async (req, res) => {
+router.post('/', validateActionBody, async (req, res) => {
   try {
-    const projectId = req.params.id;
-    const { description, notes } = req.body;
-    if (!projectId) {
-      res.status(404).json({
-        success: false,
-        error: `The project with the specified ID does not exist`
-      });
-    } else {
-      const action = await actionsDb.insert({
-        project_id: projectId,
-        description,
-        notes
-      });
-      res.status(201).json(action);
-    }
+    const { action, project } = req;
+    const { id } = project;
+    const { description, notes } = action;
+    const newAction = await db.insert({
+      project_id: id,
+      description,
+      notes
+    });
+    res.status(201).json({ ...newAction });
   } catch (error) {
-    res.status(500).json(error.message);
+    res.status(500).json({
+      error: `An error occurred while attempting to add the action`
+    });
   }
 });
 
-router.delete('/:id', async (req, res) => {
+router.delete('/:actionId', validateActionId, async (req, res) => {
   try {
-    const { id } = req.params;
-    await actionsDb.remove(id);
-    res.status(202).json({ success: true });
+    const { actionId } = req.params;
+    await db.remove(actionId);
+    res.status(204).end();
   } catch (error) {
-    res.status(500).json(error.message);
+    res.status(500).json({
+      error: `An error occurred while attempting to delete the action`
+    });
   }
 });
 
-router.put('/:id', validateID, async (req, res) => {
-  try {
-    const action = await actionsDb.update(req.params.id, req.body);
-    res.status(200).json(action);
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
-});
-
-async function validateID(req, res, next) {
-  try {
-    const action = await actionsDb.get(req.params.id);
-    if (action) {
-      req.action = action;
-      next();
-    } else {
-      next({ error: 'invalid action ID' });
+router.put(
+  '/:actionId',
+  validateActionId,
+  validateActionBody,
+  async (req, res) => {
+    try {
+      const { actionId } = req.params;
+      const { action } = req;
+      const updatedAction = await db.update(actionId, action);
+      res.json({ ...updatedAction });
+    } catch (error) {
+      res.status(500).json({
+        error: `An error occurred while attempting to update the action`
+      });
     }
-  } catch (err) {
-    res
-      .status(404)
-      .json({ error: `The action with the specified ID does not exist` });
   }
-}
+);
 
 module.exports = router;

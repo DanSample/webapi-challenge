@@ -27,13 +27,13 @@ const validateProjectBody = (req, res, next) => {
         error: `Cannot process request with an empty body`
       });
     } else {
-      const { name, description, completed } = req.body;
-      if (!name || !description || typeof completed !== 'boolean') {
+      const { name, description } = req.body;
+      if (!name || !description) {
         res.status(400).json({
-          error: `Missing data! Please include all fields (name, description, and completed)`
+          error: `Missing data! Please include all fields (name, description)`
         });
       } else {
-        const project = { name, description, completed };
+        const project = { name, description };
         req.project = project;
         next();
       }

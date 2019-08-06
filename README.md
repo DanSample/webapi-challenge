@@ -26,13 +26,23 @@ Demonstrate your understanding of this Sprint's concepts by answering the follow
 
 - [ ] Mention two parts of Express that you learned about this week.
 
+  Express is a lightweight framework for Node.js. A major feature of Express is the ability to implement middleware.
+
 - [ ] Describe Middleware?
+
+  Middleware, an array of functions that get executed in the order they are introduced into the server code.
 
 - [ ] Describe a Resource?
 
+  A resource is data the exists on a server and is accessible with end points that we can perform CRUD operations on. 
+
 - [ ] What can the API return to help clients know if a request was successful?
 
+  It can return a status code 200(OK)
+
 - [ ] How can we partition our application into sub-applications?
+
+  Using Express Routers.
 
 ## Project Setup
 
